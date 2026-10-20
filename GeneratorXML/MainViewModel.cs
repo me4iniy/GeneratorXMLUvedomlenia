@@ -217,6 +217,37 @@ namespace GeneratorXML
             }
         }
 
+        private string NormalizePeriodKey(string periodText)
+        {
+            if (string.IsNullOrWhiteSpace(periodText))
+                return string.Empty;
+
+            var text = periodText.Trim();
+
+            if (!text.Contains("/"))
+                return text;
+
+            var parts = text.Split('/');
+            if (parts.Length < 2)
+                return text;
+
+            var quarter = parts[0].Trim();
+            var monthPart = parts[1].Trim();
+
+            if (!int.TryParse(quarter, out _))
+                return text;
+
+            if (!int.TryParse(monthPart, out var monthValue))
+                return text;
+
+            // 01 -> 1, 11 -> 1
+            // 02 -> 2, 12 -> 2
+            // 03 -> 3, 13 -> 3
+            var month = monthValue % 10;
+
+            return $"{quarter}/{month}";
+        }
+
         private void LoadPeriodsFromExcel(string filePath)
         {
             try
@@ -234,29 +265,26 @@ namespace GeneratorXML
 
                     for (int row = 3; row < 5000; row++)
                     {
-                        var cell = worksheet.Cells[row, 2]; // B
-                        var value = cell.Text?.Trim();
+                        var value = worksheet.Cells[row, 2].Text?.Trim();
 
                         if (string.IsNullOrWhiteSpace(value))
-                        {
-                            // Пустая строка может быть разделителем между кварталами,
-                            // поэтому пропускаем её, а не прерываем чтение файла.
                             continue;
-                        }
 
-                        if (!periods.Contains(value))
-                            periods.Add(value);
+                        var normalized = NormalizePeriodKey(value);
+
+                        if (!periods.Contains(normalized))
+                            periods.Add(normalized);
                     }
                 }
 
                 Periods = new ObservableCollection<string>(periods);
-
                 if (Periods.Count > 0)
                     SelectedPeriod = Periods[0];
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка чтения листа '{SheetName}': {ex.Message}", "Ошибка Excel", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка чтения листа '{SheetName}': {ex.Message}", "Ошибка Excel",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -296,6 +324,7 @@ namespace GeneratorXML
         private List<TaxLine> ReadPeriodRows(string filePath, string selectedPeriod)
         {
             var result = new List<TaxLine>();
+            var selectedKey = NormalizePeriodKey(selectedPeriod);
 
             using (var package = new ExcelPackage(new FileInfo(filePath)))
             {
@@ -303,71 +332,72 @@ namespace GeneratorXML
                 if (worksheet == null)
                     throw new Exception($"Лист '{SheetName}' не найден.");
 
+                decimal totalC = 0m;
+                decimal totalD = 0m;
+                decimal totalE = 0m;
+
+                string monthCode = "";
+                string periodCode = "31";
+
                 for (int row = 3; row < 5000; row++)
                 {
-                    var periodCell = worksheet.Cells[row, 2]; // B
-                    var periodText = periodCell.Text?.Trim();
+                    var periodText = worksheet.Cells[row, 2].Text?.Trim();
 
                     if (string.IsNullOrWhiteSpace(periodText))
-                    {
-                        // Пустая строка — не конец файла, а просто разделитель между блоками.
                         continue;
-                    }
 
-                    if (!string.Equals(periodText, selectedPeriod, StringComparison.OrdinalIgnoreCase))
+                    var normalized = NormalizePeriodKey(periodText);
+
+                    if (!string.Equals(normalized, selectedKey, StringComparison.OrdinalIgnoreCase))
                         continue;
 
                     var valueC = worksheet.Cells[row, 3].GetValue<decimal?>();
                     var valueD = worksheet.Cells[row, 4].GetValue<decimal?>();
                     var valueE = worksheet.Cells[row, 5].GetValue<decimal?>();
 
-                    var periodCode = GetPeriodCode(periodText);
-                    var monthCode = GetNomerMesKvart(periodText);
-                    var year = DateTime.Today.Year.ToString();
+                    if (valueC.HasValue) totalC += valueC.Value;
+                    if (valueD.HasValue) totalD += valueD.Value;
+                    if (valueE.HasValue) totalE += valueE.Value;
 
-                    if (valueC.HasValue)
+                    if (string.IsNullOrEmpty(monthCode))
                     {
-                        result.Add(new TaxLine
-                        {
-                            Oktmo = Oktmo,
-                            Kbk = "18210102010011000110",
-                            Sum = valueC.Value.ToString("0.00", CultureInfo.InvariantCulture),
-                            Period = periodCode,
-                            NomerMesKvart = monthCode,
-                            Year = year
-                        });
+                        monthCode = GetNomerMesKvart(periodText);
+                        periodCode = GetPeriodCode(periodText);
                     }
-
-                    if (valueD.HasValue)
-                    {
-                        result.Add(new TaxLine
-                        {
-                            Oktmo = Oktmo,
-                            Kbk = "18210102210011000110",
-                            Sum = valueD.Value.ToString("0.00", CultureInfo.InvariantCulture),
-                            Period = periodCode,
-                            NomerMesKvart = monthCode,
-                            Year = year
-                        });
-                    }
-
-                    if (valueE.HasValue)
-                    {
-                        result.Add(new TaxLine
-                        {
-                            Oktmo = Oktmo,
-                            Kbk = "18210201000011000160",
-                            Sum = valueE.Value.ToString("0.00", CultureInfo.InvariantCulture),
-                            Period = periodCode,
-                            NomerMesKvart = monthCode,
-                            Year = year
-                        });
-                    }
-
-                    // Если в файле один период = одна строка, можно оставить break;
-                    // если строк с этим периодом несколько — не прерываем чтение.
-                    // break;
                 }
+
+                if (totalC != 0)
+                    result.Add(new TaxLine
+                    {
+                        Oktmo = Oktmo,
+                        Kbk = "18210102010011000110",
+                        Sum = totalC.ToString("0.00", CultureInfo.InvariantCulture),
+                        Period = periodCode,
+                        NomerMesKvart = monthCode,
+                        Year = DateTime.Today.Year.ToString()
+                    });
+
+                if (totalD != 0)
+                    result.Add(new TaxLine
+                    {
+                        Oktmo = Oktmo,
+                        Kbk = "18210102210011000110",
+                        Sum = totalD.ToString("0.00", CultureInfo.InvariantCulture),
+                        Period = periodCode,
+                        NomerMesKvart = monthCode,
+                        Year = DateTime.Today.Year.ToString()
+                    });
+
+                if (totalE != 0)
+                    result.Add(new TaxLine
+                    {
+                        Oktmo = Oktmo,
+                        Kbk = "18210201000011000160",
+                        Sum = totalE.ToString("0.00", CultureInfo.InvariantCulture),
+                        Period = periodCode,
+                        NomerMesKvart = monthCode,
+                        Year = DateTime.Today.Year.ToString()
+                    });
             }
 
             return result;
