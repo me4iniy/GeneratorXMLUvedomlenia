@@ -238,7 +238,11 @@ namespace GeneratorXML
                         var value = cell.Text?.Trim();
 
                         if (string.IsNullOrWhiteSpace(value))
-                            break;
+                        {
+                            // Пустая строка может быть разделителем между кварталами,
+                            // поэтому пропускаем её, а не прерываем чтение файла.
+                            continue;
+                        }
 
                         if (!periods.Contains(value))
                             periods.Add(value);
@@ -305,7 +309,10 @@ namespace GeneratorXML
                     var periodText = periodCell.Text?.Trim();
 
                     if (string.IsNullOrWhiteSpace(periodText))
-                        break;
+                    {
+                        // Пустая строка — не конец файла, а просто разделитель между блоками.
+                        continue;
+                    }
 
                     if (!string.Equals(periodText, selectedPeriod, StringComparison.OrdinalIgnoreCase))
                         continue;
@@ -357,7 +364,9 @@ namespace GeneratorXML
                         });
                     }
 
-                    break;
+                    // Если в файле один период = одна строка, можно оставить break;
+                    // если строк с этим периодом несколько — не прерываем чтение.
+                    // break;
                 }
             }
 
