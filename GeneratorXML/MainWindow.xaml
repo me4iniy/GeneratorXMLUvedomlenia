@@ -32,26 +32,17 @@
 			</StackPanel>
 
 			<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-				<TextBlock Text="R_T:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-				<TextBox Width="220" Text="{Binding PrefixRT}"/>
-
-				<TextBlock Text="A:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBox Width="80" Text="{Binding A}"/>
-
-				<TextBlock Text="K:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBox Width="80" Text="{Binding K}"/>
-
-				<TextBlock Text="O:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBox Width="180" Text="{Binding O}"/>
+				<TextBox Width="220" Text="{Binding PrefixRT}" IsReadOnly="True" Margin="10,0,5,0"/>
+				<TextBox Width="80" Text="{Binding FromFNS}" Margin="10,0,5,0"/>
+				<TextBox Width="80" Text="{Binding ToFNS}" Margin="10,0,5,0"/>
+				<TextBox Width="180" Text="{Binding SenderINN}" IsReadOnly="True" Margin="10,0,5,0"/>
 
 				<Button Content="Сформировать имя" Width="150" Margin="10,0,0,0" Command="{Binding GenerateFileNameCommand}"/>
 			</StackPanel>
 
 			<StackPanel Orientation="Horizontal">
 				<TextBlock Text="ИдФайл:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-				<TextBox Width="620" Text="{Binding FileId, UpdateSourceTrigger=PropertyChanged}"/>
-				<TextBlock Text="Длина:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBlock Text="{Binding FileNameLength}" FontWeight="Bold"/>
+				<TextBox Width="620" Text="{Binding FileId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"/>
 				<Button Content="Сохранить XML" Width="140" Margin="20,0,0,0" Command="{Binding GenerateXmlCommand}"/>
 			</StackPanel>
 		</StackPanel>
@@ -66,10 +57,10 @@
 
 					<StackPanel Grid.Column="0" Margin="0,0,20,0">
 						<TextBlock Text="КНД"/>
-						<TextBox Text="{Binding KND}"/>
+						<TextBox Text="{Binding KND}" IsReadOnly="True"/>
 
 						<TextBlock Text="ДатаДок" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding DateDoc}"/>
+						<TextBox Text="{Binding DateDoc}" IsReadOnly="True"/>
 
 						<TextBlock Text="КодНО" Margin="0,10,0,0"/>
 						<TextBox Text="{Binding KodNO}"/>
@@ -78,13 +69,13 @@
 						<TextBox Text="{Binding InnFL}"/>
 
 						<TextBlock Text="Фамилия" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding Fam}"/>
+						<TextBox Text="{Binding Fam}" IsReadOnly="True"/>
 
 						<TextBlock Text="Имя" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding Name}"/>
+						<TextBox Text="{Binding Name}" IsReadOnly="True"/>
 
 						<TextBlock Text="Отчество" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding Patronymic}"/>
+						<TextBox Text="{Binding Patronymic}" IsReadOnly="True"/>
 					</StackPanel>
 
 					<StackPanel Grid.Column="1">
