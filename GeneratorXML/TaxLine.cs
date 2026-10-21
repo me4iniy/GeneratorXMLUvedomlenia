@@ -1,57 +1,42 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace GeneratorXML
 {
-    public class TaxLine : INotifyPropertyChanged
+    public class TaxLine
     {
-        private string _oktmo = "";
-        private string _kbk = "";
-        private string _sum = "";
-        private string _period = "";
-        private string _nomerMesKvart = "";
-        private string _year = "";
-
-        public string Oktmo
+        public TaxLine(Type type, int oktmo, float sum, string period, string nomerMesKvart, int year)
         {
-            get => _oktmo;
-            set { _oktmo = value; OnPropertyChanged(nameof(Oktmo)); }
+            switch (type)
+            {
+                case Type.Insuranse:
+                    Kbk = "18210201000011000160";
+                    break;
+                case Type.NDFL:
+                    Kbk = "18210102010011000110";
+                    break;
+                case Type.sNDFL:
+                    Kbk = "18210102210011000110";
+                    break;
+            }
+
+            Oktmo = oktmo;
+            Sum = sum;
+            Period = period;
+            NomerMesKvart = nomerMesKvart;
+            Year = year;
         }
 
-        public string Kbk
-        {
-            get => _kbk;
-            set { _kbk = value; OnPropertyChanged(nameof(Kbk)); }
-        }
+        public enum Type { Insuranse, NDFL, sNDFL }
 
-        public string Sum
-        {
-            get => _sum;
-            set { _sum = value; OnPropertyChanged(nameof(Sum)); }
-        }
-
-        public string Period
-        {
-            get => _period;
-            set { _period = value; OnPropertyChanged(nameof(Period)); }
-        }
-
-        public string NomerMesKvart
-        {
-            get => _nomerMesKvart;
-            set { _nomerMesKvart = value; OnPropertyChanged(nameof(NomerMesKvart)); }
-        }
-
-        public string Year
-        {
-            get => _year;
-            set { _year = value; OnPropertyChanged(nameof(Year)); }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        public readonly int Oktmo;
+        public readonly string Kbk;
+        public readonly float Sum;
+        public readonly string Period;
+        public readonly string NomerMesKvart;
+        public readonly int Year;
     }
 }

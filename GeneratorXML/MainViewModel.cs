@@ -18,184 +18,87 @@ namespace GeneratorXML
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private const string SheetName = "УведомленияИПерсы";
 
-        private string _excelPath = @"C:\Users\kille\Dropbox\Рабочая\Табель расчетов\Аккуина Г.В..xlsm";
-        private string _selectedPeriod = "";
-        private ObservableCollection<string> _periods = new ObservableCollection<string>();
-        private ObservableCollection<TaxLine> _taxLines = new ObservableCollection<TaxLine>();
+        public const string SenderINN = "742600021392";
+        public const string _fam_SenderSur = "Вековшинина";
+        public const string _name_SenderName = "Марина";
+        public const string _patronymic_SenderSecName = "Анатольевна";
+        public const string _docName_SenderDoc = "Доверенность";
+        public const string _prPodp_SenderStatus = "2";
+
+        public const string PrefixRT = "UT_UVISCHSUMNAL";
+        public const string KND = "1110355";
+
+        public const string VersProg = "Налогоплательщик ЮЛ 4.94.1";
+        public const string VersForm = "5.03";
+
+        private string _dataPath = @"C:\Users\kille\Dropbox\Рабочая\Табель расчетов\Аккуина Г.В..xlsm";
+        public string DataPath
+        {
+            get { return _dataPath; }
+            set {  _dataPath = value; OnPropertyChanged(nameof(DataPath)); }
+        }
+
+        public ObservableCollection<TaxLine> TaxLines = new ObservableCollection<TaxLine>();
+        public ObservableCollection<TaxMount> TaxMounts = new ObservableCollection<TaxMount>();
+        public ObservableCollection<TaxQuarter> TaxQuarters = new ObservableCollection<TaxQuarter>();
+
+        private TaxPeriodsManager _TaxPeriodsManager = new TaxPeriodsManager();
+
         private string _fileId = "";
+        public string FileId
+        {
+            get { return _fileId; }
+            set { _fileId = value; OnPropertyChanged(nameof(FileId));}
+        }
         private string _xmlPreview = "";
-        private string _prefixRT = "UT_UVISCHSUMNAL";
-        private string _a = "7460";
-        private string _k = "7460";
-        private string _o = "742600021392";
-
-        private string _knd = "1110355";
+        public string XmlPreview
+        {
+            get { return _xmlPreview; }
+            set { _xmlPreview = value; OnPropertyChanged(nameof(XmlPreview)); }
+        }
+        private string _fromFNS = "7460";
+        public string FromFNS
+        {
+            get { return _fromFNS; }
+            set { _fromFNS = value; OnPropertyChanged(nameof(FromFNS)); }
+        }
+        private string _toFNS = "7460";
+        public string ToFNS
+        {
+            get { return _toFNS; }
+            set { _toFNS = value; OnPropertyChanged(nameof(ToFNS)); }
+        }
         private string _dateDoc = DateTime.Today.ToString("dd.MM.yyyy");
         private string _kodNO = "7460";
         private string _innFL = "742601130309";
-        private string _fam = "Вековшинина";
-        private string _name = "Марина";
-        private string _patronymic = "Анатольевна";
-        private string _docName = "Доверенность";
-        private string _versProg = "Налогоплательщик ЮЛ 4.94.1";
-        private string _versForm = "5.03";
-        private string _oktmo = "75506000";
-        private string _prPodp = "2";
+        public string InnFL
+        {
+            get { return _innFL; }
+            set { _innFL = value; OnPropertyChanged(nameof(InnFL)); }
+        }
+
+        private int _selectedQuarter = -1;
+        public int SelectedQuarter
+        {
+            get { return _selectedQuarter; }
+            set { _selectedQuarter = value; OnPropertyChanged(nameof(SelectedQuarter)); }
+        }
+        private int _selectedMonth = -1;
+        public int SelectedMonth
+        {
+            get { return _selectedMonth; }
+            set { _selectedMonth = value; OnPropertyChanged(nameof(SelectedMonth)); }
+        }
+
 
         public MainViewModel()
         {
-            // Инициализация стартовых строк
-            TaxLines = new ObservableCollection<TaxLine>
-            {
-                new TaxLine { Oktmo = "75506000", Kbk = "18210102010011000110", Sum = "0.00", Period = "31", NomerMesKvart = "02", Year = DateTime.Today.Year.ToString() },
-                new TaxLine { Oktmo = "75506000", Kbk = "18210102210011000110", Sum = "0.00", Period = "31", NomerMesKvart = "02", Year = DateTime.Today.Year.ToString() },
-                new TaxLine { Oktmo = "75506000", Kbk = "18210201000011000160", Sum = "0.00", Period = "31", NomerMesKvart = "02", Year = DateTime.Today.Year.ToString() }
-            };
-
-            LoadPeriodsFromExcel(_excelPath);
-
             SelectExcelCommand = new RelayCommand(_ => SelectExcel());
             LoadPeriodDataCommand = new RelayCommand(_ => LoadPeriodData());
             GenerateFileNameCommand = new RelayCommand(_ => GenerateFileName());
             GenerateXmlCommand = new RelayCommand(_ => GenerateXml());
         }
-
-        public string ExcelPath
-        {
-            get => _excelPath;
-            set { _excelPath = value; OnPropertyChanged(nameof(ExcelPath)); }
-        }
-
-        public string SelectedPeriod
-        {
-            get => _selectedPeriod;
-            set { _selectedPeriod = value; OnPropertyChanged(nameof(SelectedPeriod)); }
-        }
-
-        public ObservableCollection<string> Periods
-        {
-            get => _periods;
-            set { _periods = value; OnPropertyChanged(nameof(Periods)); }
-        }
-
-        public ObservableCollection<TaxLine> TaxLines
-        {
-            get => _taxLines;
-            set { _taxLines = value; OnPropertyChanged(nameof(TaxLines)); }
-        }
-
-        public string FileId
-        {
-            get => _fileId;
-            set { _fileId = value; OnPropertyChanged(nameof(FileId)); OnPropertyChanged(nameof(FileNameLength)); }
-        }
-
-        public int FileNameLength => string.IsNullOrEmpty(FileId) ? 0 : FileId.Length;
-
-        public string XmlPreview
-        {
-            get => _xmlPreview;
-            set { _xmlPreview = value; OnPropertyChanged(nameof(XmlPreview)); }
-        }
-
-        public string PrefixRT
-        {
-            get => _prefixRT;
-            set { _prefixRT = value; OnPropertyChanged(nameof(PrefixRT)); }
-        }
-
-        public string A
-        {
-            get => _a;
-            set { _a = value; OnPropertyChanged(nameof(A)); }
-        }
-
-        public string K
-        {
-            get => _k;
-            set { _k = value; OnPropertyChanged(nameof(K)); }
-        }
-
-        public string O
-        {
-            get => _o;
-            set { _o = value; OnPropertyChanged(nameof(O)); }
-        }
-
-        public string KND
-        {
-            get => _knd;
-            set { _knd = value; OnPropertyChanged(nameof(KND)); }
-        }
-
-        public string DateDoc
-        {
-            get => _dateDoc;
-            set { _dateDoc = value; OnPropertyChanged(nameof(DateDoc)); }
-        }
-
-        public string KodNO
-        {
-            get => _kodNO;
-            set { _kodNO = value; OnPropertyChanged(nameof(KodNO)); }
-        }
-
-        public string InnFL
-        {
-            get => _innFL;
-            set { _innFL = value; OnPropertyChanged(nameof(InnFL)); }
-        }
-
-        public string Fam
-        {
-            get => _fam;
-            set { _fam = value; OnPropertyChanged(nameof(Fam)); }
-        }
-
-        public string Name
-        {
-            get => _name;
-            set { _name = value; OnPropertyChanged(nameof(Name)); }
-        }
-
-        public string Patronymic
-        {
-            get => _patronymic;
-            set { _patronymic = value; OnPropertyChanged(nameof(Patronymic)); }
-        }
-
-        public string DocName
-        {
-            get => _docName;
-            set { _docName = value; OnPropertyChanged(nameof(DocName)); }
-        }
-
-        public string VersProg
-        {
-            get => _versProg;
-            set { _versProg = value; OnPropertyChanged(nameof(VersProg)); }
-        }
-
-        public string VersForm
-        {
-            get => _versForm;
-            set { _versForm = value; OnPropertyChanged(nameof(VersForm)); }
-        }
-
-        public string Oktmo
-        {
-            get => _oktmo;
-            set { _oktmo = value; OnPropertyChanged(nameof(Oktmo)); }
-        }
-
-        public string PrPodp
-        {
-            get => _prPodp;
-            set { _prPodp = value; OnPropertyChanged(nameof(PrPodp)); }
-        }
-
         public ICommand SelectExcelCommand { get; }
         public ICommand LoadPeriodDataCommand { get; }
         public ICommand GenerateFileNameCommand { get; }
@@ -207,45 +110,14 @@ namespace GeneratorXML
             {
                 Filter = "Excel files (*.xlsm)|*.xlsm|Excel files (*.xlsx)|*.xlsx",
                 Title = "Выберите файл Excel",
-                InitialDirectory = Path.GetDirectoryName(ExcelPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                InitialDirectory = Path.GetDirectoryName(DataPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
             };
 
             if (dialog.ShowDialog() == true)
             {
-                ExcelPath = dialog.FileName;
-                LoadPeriodsFromExcel(ExcelPath);
+                DataPath = dialog.FileName;
+                LoadPeriodsFromExcel(DataPath);
             }
-        }
-
-        private string NormalizePeriodKey(string periodText)
-        {
-            if (string.IsNullOrWhiteSpace(periodText))
-                return string.Empty;
-
-            var text = periodText.Trim();
-
-            if (!text.Contains("/"))
-                return text;
-
-            var parts = text.Split('/');
-            if (parts.Length < 2)
-                return text;
-
-            var quarter = parts[0].Trim();
-            var monthPart = parts[1].Trim();
-
-            if (!int.TryParse(quarter, out _))
-                return text;
-
-            if (!int.TryParse(monthPart, out var monthValue))
-                return text;
-
-            // 01 -> 1, 11 -> 1
-            // 02 -> 2, 12 -> 2
-            // 03 -> 3, 13 -> 3
-            var month = monthValue % 10;
-
-            return $"{quarter}/{month}";
         }
 
         private void LoadPeriodsFromExcel(string filePath)
@@ -255,35 +127,15 @@ namespace GeneratorXML
                 if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                     return;
 
-                var periods = new List<string>();
-
                 using (var package = new ExcelPackage(new FileInfo(filePath)))
-                {
-                    var worksheet = package.Workbook.Worksheets[SheetName];
-                    if (worksheet == null)
-                        throw new Exception($"Лист '{SheetName}' не найден.");
+                    _TaxPeriodsManager.UpdateData(package);
 
-                    for (int row = 3; row < 5000; row++)
-                    {
-                        var value = worksheet.Cells[row, 2].Text?.Trim();
-
-                        if (string.IsNullOrWhiteSpace(value))
-                            continue;
-
-                        var normalized = NormalizePeriodKey(value);
-
-                        if (!periods.Contains(normalized))
-                            periods.Add(normalized);
-                    }
-                }
-
-                Periods = new ObservableCollection<string>(periods);
-                if (Periods.Count > 0)
-                    SelectedPeriod = Periods[0];
+                //SelectedMonth = -1;
+                //SelectedQuarter = -1;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка чтения листа '{SheetName}': {ex.Message}", "Ошибка Excel",
+                MessageBox.Show($"Ошибка чтения: {ex.Message}", "Ошибка Excel",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -292,23 +144,9 @@ namespace GeneratorXML
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(ExcelPath) || !File.Exists(ExcelPath))
+                if (string.IsNullOrWhiteSpace(DataPath) || !File.Exists(DataPath))
                 {
                     MessageBox.Show("Выберите корректный Excel-файл.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(SelectedPeriod))
-                {
-                    MessageBox.Show("Выберите период.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                var rows = ReadPeriodRows(ExcelPath, SelectedPeriod);
-
-                if (rows == null || rows.Count == 0)
-                {
-                    MessageBox.Show("Для выбранного периода данные не найдены.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
@@ -321,39 +159,30 @@ namespace GeneratorXML
             }
         }
 
-        private List<TaxLine> ReadPeriodRows(string filePath, string selectedPeriod)
+        private List<TaxLine> ReadMonthRows(int selectedMonth)
         {
-            var result = new List<TaxLine>();
-            var selectedKey = NormalizePeriodKey(selectedPeriod);
+            List<TaxLine> result = new List<TaxLine>();
 
-            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            using (var package = new ExcelPackage(new FileInfo(ExcelPath)))
             {
-                var worksheet = package.Workbook.Worksheets[SheetName];
-                if (worksheet == null)
-                    throw new Exception($"Лист '{SheetName}' не найден.");
+                var worksheet = package.Workbook.Worksheets[SheetNameUved]
+                    ?? throw new Exception($"Лист '{SheetNameUved}' не найден.");
 
-                decimal totalC = 0m;
-                decimal totalD = 0m;
-                decimal totalE = 0m;
-
-                string monthCode = "";
-                string periodCode = "31";
-
-                for (int row = 3; row < 5000; row++)
+                for (int row = 3; row < 30; row++)
                 {
                     var periodText = worksheet.Cells[row, 2].Text?.Trim();
 
                     if (string.IsNullOrWhiteSpace(periodText))
                         continue;
 
-                    var normalized = NormalizePeriodKey(periodText);
+                    int normalizedMonth = NormalizeMonthKey(periodText);
 
-                    if (!string.Equals(normalized, selectedKey, StringComparison.OrdinalIgnoreCase))
+                    if (normalizedMonth != selectedMonth)
                         continue;
 
-                    var valueC = worksheet.Cells[row, 3].GetValue<decimal?>();
-                    var valueD = worksheet.Cells[row, 4].GetValue<decimal?>();
-                    var valueE = worksheet.Cells[row, 5].GetValue<decimal?>();
+                    float? valueC = worksheet.Cells[row, 3].GetValue<float?>();
+                    float? valueD = worksheet.Cells[row, 4].GetValue<float?>();
+                    float? valueE = worksheet.Cells[row, 5].GetValue<float?>();
 
                     if (valueC.HasValue) totalC += valueC.Value;
                     if (valueD.HasValue) totalD += valueD.Value;

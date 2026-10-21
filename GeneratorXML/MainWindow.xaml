@@ -6,6 +6,11 @@
         xmlns:local="clr-namespace:GeneratorXML"
         mc:Ignorable="d"
         Title="Генератор XML" Height="840" Width="1180" WindowStartupLocation="CenterScreen">
+
+	<Window.DataContext>
+		<local:MainViewModel/>
+	</Window.DataContext>
+
 	<Grid Margin="10">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
@@ -16,13 +21,13 @@
 		<StackPanel Grid.Row="0" Margin="0,0,0,10">
 			<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
 				<TextBlock Text="Путь к файлу Excel:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-				<TextBox Width="560" Text="{Binding ExcelPath, UpdateSourceTrigger=PropertyChanged}"/>
+				<TextBox Width="560" Text="{Binding DataPath, UpdateSourceTrigger=PropertyChanged}"/>
 				<Button Content="Выбрать..." Width="100" Margin="10,0,0,0" Command="{Binding SelectExcelCommand}"/>
 			</StackPanel>
 
 			<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
 				<TextBlock Text="Период:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-				<ComboBox Width="220" ItemsSource="{Binding Periods}" SelectedItem="{Binding SelectedPeriod}"/>
+				<ComboBox Width="220" ItemsSource="{Binding TaxQuarters}" SelectedItem="{Binding SelectedQuarter}"/>
 				<Button Content="Загрузить данные" Width="150" Margin="10,0,0,0" Command="{Binding LoadPeriodDataCommand}"/>
 			</StackPanel>
 

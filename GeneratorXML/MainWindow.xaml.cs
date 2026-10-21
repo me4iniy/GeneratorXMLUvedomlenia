@@ -20,9 +20,9 @@ namespace GeneratorXML
     {
         public MainWindow()
         {
-            InitializeComponent();
-
             ExcelPackage.License.SetNonCommercialPersonal("me4iniy");
+
+            InitializeComponent();
 
             DataContext = new MainViewModel();
         }
