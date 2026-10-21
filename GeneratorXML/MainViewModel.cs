@@ -33,6 +33,7 @@ namespace GeneratorXML
 
         private string _dataPath = @"C:\Users\kille\Dropbox\Рабочая\Табель расчетов\Аккуина Г.В..xlsm";
         private TaxQuarter _selectedQuarter;
+        private TaxMount _selectedMonth;
         private string _fileId = "";
         private string _xmlPreview = "";
         private string _fromFNS = "7460";
@@ -48,8 +49,9 @@ namespace GeneratorXML
         }
 
         public ObservableCollection<TaxQuarter> TaxQuarters => _taxPeriodsManager.TaxQuarters;
-
         public ObservableCollection<TaxLine> TaxLines { get; private set; } = new ObservableCollection<TaxLine>();
+
+        public ObservableCollection<TaxMount> Months => SelectedQuarter == null ? new ObservableCollection<TaxMount>() : SelectedQuarter.Mounts;
 
         public TaxQuarter SelectedQuarter
         {
@@ -61,9 +63,38 @@ namespace GeneratorXML
 
                 _selectedQuarter = value;
                 OnPropertyChanged(nameof(SelectedQuarter));
+                OnPropertyChanged(nameof(Months));
+
+                if (_selectedQuarter == null)
+                {
+                    _selectedMonth = null;
+                    OnPropertyChanged(nameof(SelectedMonth));
+                    LoadSelectedQuarterData();
+                    return;
+                }
+
+                _selectedMonth = _selectedQuarter.Mounts.FirstOrDefault();
+                OnPropertyChanged(nameof(SelectedMonth));
                 LoadSelectedQuarterData();
             }
         }
+
+        public TaxMount SelectedMonth
+        {
+            get => _selectedMonth;
+            set
+            {
+                if (Equals(_selectedMonth, value))
+                    return;
+
+                _selectedMonth = value;
+                OnPropertyChanged(nameof(SelectedMonth));
+                LoadSelectedQuarterData();
+            }
+        }
+
+        public string PrefixRTText => PrefixRTDefault;
+        public string SenderINNText => SenderINN;
 
         public string FileId
         {
@@ -158,6 +189,8 @@ namespace GeneratorXML
 
                 OnPropertyChanged(nameof(TaxQuarters));
                 SelectedQuarter = TaxQuarters.FirstOrDefault();
+                if (SelectedQuarter != null)
+                    SelectedMonth = SelectedQuarter.Mounts.FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -183,6 +216,8 @@ namespace GeneratorXML
 
                 OnPropertyChanged(nameof(TaxQuarters));
                 SelectedQuarter = TaxQuarters.FirstOrDefault();
+                if (SelectedQuarter != null)
+                    SelectedMonth = SelectedQuarter.Mounts.FirstOrDefault();
 
                 MessageBox.Show($"Данные загружены. Найдено кварталов: {TaxQuarters.Count}", "Готово",
                     MessageBoxButton.OK, MessageBoxImage.Information);
@@ -200,7 +235,11 @@ namespace GeneratorXML
             if (SelectedQuarter == null)
                 return;
 
-            foreach (var taxLine in SelectedQuarter.Mounts.SelectMany(m => m.TaxLines))
+            var mountCollection = SelectedMonth == null
+                ? SelectedQuarter.Mounts
+                : new[] { SelectedMonth };
+
+            foreach (var taxLine in mountCollection.SelectMany(m => m.TaxLines))
                 TaxLines.Add(taxLine);
         }
 

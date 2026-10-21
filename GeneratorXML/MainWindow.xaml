@@ -7,10 +7,6 @@
         mc:Ignorable="d"
         Title="Генератор XML" Height="840" Width="1180" WindowStartupLocation="CenterScreen">
 
-	<Window.DataContext>
-		<local:MainViewModel/>
-	</Window.DataContext>
-	
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -31,21 +27,28 @@
                           ItemsSource="{Binding TaxQuarters}"
                           SelectedItem="{Binding SelectedQuarter, Mode=TwoWay}"
                           DisplayMemberPath="Quarter"/>
+
+                <TextBlock Text="Месяц:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <ComboBox Width="180"
+                          ItemsSource="{Binding Months}"
+                          SelectedItem="{Binding SelectedMonth, Mode=TwoWay}"
+                          DisplayMemberPath="Month"/>
+
                 <Button Content="Загрузить данные" Width="150" Margin="10,0,0,0" Command="{Binding LoadPeriodDataCommand}"/>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                 <TextBlock Text="R_T:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-				<TextBox Width="220" Text="{Binding PrefixRTDefault}" IsReadOnly="True" />
+                <TextBox Width="220" Text="{Binding PrefixRTText}" IsReadOnly="True"/>
 
                 <TextBlock Text="A:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBox Width="80" Text="{Binding FromFNS}"/>
+                <TextBox Width="80" Text="{Binding FromFNS}"/>
 
                 <TextBlock Text="K:" VerticalAlignment="Center" Margin="10,0,5,0"/>
                 <TextBox Width="80" Text="{Binding ToFNS}"/>
 
                 <TextBlock Text="O:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBox Width="180" Text="{Binding SenderINN}" IsReadOnly="True"/>
+                <TextBox Width="180" Text="{Binding SenderINNText}" IsReadOnly="True"/>
 
                 <Button Content="Сформировать имя" Width="150" Margin="10,0,0,0" Command="{Binding GenerateFileNameCommand}"/>
             </StackPanel>
