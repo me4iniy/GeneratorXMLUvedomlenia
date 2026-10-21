@@ -1,29 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GeneratorXML
 {
     public class TaxMount : INotifyPropertyChanged
     {
-        private readonly string _AffiliationWithQ;
-        public TaxMount(string month, string parent)
+        private readonly ObservableCollection<TaxLine> _taxLines = new ObservableCollection<TaxLine>();
+        private readonly string _affiliationWithQuarter;
+
+        public TaxMount(string month, string parentQuarter)
         {
-            _Month = month;
-            _AffiliationWithQ = parent;
+            Month = month;
+            _affiliationWithQuarter = parentQuarter;
         }
 
-        public readonly ObservableCollection<TaxLine> _taxLines = new ObservableCollection<TaxLine>();
-        public readonly string _Month;
+        public string Month { get; }
+        public string ParentQuarter => _affiliationWithQuarter;
+        public ObservableCollection<TaxLine> TaxLines => _taxLines;
 
         public override string ToString()
         {
-            int quarter = TaxQuarter.ConvertToInt(_AffiliationWithQ);
-            int month = TaxMount.ConvertToInt(_Month);
+            int quarter = TaxQuarter.ConvertToInt(_affiliationWithQuarter);
+            int month = ConvertToInt(Month);
             return ((quarter - 1) * 3 + month).ToString();
         }
 
