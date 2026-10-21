@@ -1,4 +1,3 @@
-﻿using GeneratorXML;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using System;
@@ -18,79 +17,135 @@ namespace GeneratorXML
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-
         public const string SenderINN = "742600021392";
-        public const string _fam_SenderSur = "Вековшинина";
-        public const string _name_SenderName = "Марина";
-        public const string _patronymic_SenderSecName = "Анатольевна";
-        public const string _docName_SenderDoc = "Доверенность";
-        public const string _prPodp_SenderStatus = "2";
+        public const string SenderFam = "Вековшинина";
+        public const string SenderName = "Марина";
+        public const string SenderPatronymic = "Анатольевна";
+        public const string DocNameDefault = "Доверенность";
+        public const string PrPodpDefault = "2";
 
-        public const string PrefixRT = "UT_UVISCHSUMNAL";
-        public const string KND = "1110355";
+        public const string PrefixRTDefault = "UT_UVISCHSUMNAL";
+        public const string KNDDefault = "1110355";
+        public const string VersProgDefault = "Налогоплательщик ЮЛ 4.94.1";
+        public const string VersFormDefault = "5.03";
 
-        public const string VersProg = "Налогоплательщик ЮЛ 4.94.1";
-        public const string VersForm = "5.03";
+        private readonly TaxPeriodsManager _taxPeriodsManager = new TaxPeriodsManager();
 
         private string _dataPath = @"C:\Users\kille\Dropbox\Рабочая\Табель расчетов\Аккуина Г.В..xlsm";
-        public string DataPath
-        {
-            get { return _dataPath; }
-            set {  _dataPath = value; OnPropertyChanged(nameof(DataPath)); }
-        }
-
-        public ObservableCollection<TaxLine> TaxLines = new ObservableCollection<TaxLine>();
-        public ObservableCollection<TaxMount> TaxMounts = new ObservableCollection<TaxMount>();
-        public ObservableCollection<TaxQuarter> TaxQuarters = new ObservableCollection<TaxQuarter>();
-
-        private TaxPeriodsManager _TaxPeriodsManager = new TaxPeriodsManager();
-
+        private TaxQuarter _selectedQuarter;
         private string _fileId = "";
-        public string FileId
-        {
-            get { return _fileId; }
-            set { _fileId = value; OnPropertyChanged(nameof(FileId));}
-        }
         private string _xmlPreview = "";
-        public string XmlPreview
-        {
-            get { return _xmlPreview; }
-            set { _xmlPreview = value; OnPropertyChanged(nameof(XmlPreview)); }
-        }
         private string _fromFNS = "7460";
-        public string FromFNS
-        {
-            get { return _fromFNS; }
-            set { _fromFNS = value; OnPropertyChanged(nameof(FromFNS)); }
-        }
         private string _toFNS = "7460";
-        public string ToFNS
-        {
-            get { return _toFNS; }
-            set { _toFNS = value; OnPropertyChanged(nameof(ToFNS)); }
-        }
         private string _dateDoc = DateTime.Today.ToString("dd.MM.yyyy");
         private string _kodNO = "7460";
         private string _innFL = "742601130309";
+        private string _prefixRT = PrefixRTDefault;
+        private string _a = "1";
+        private string _k = "1";
+        private string _o = "1";
+
+        public string DataPath
+        {
+            get => _dataPath;
+            set { _dataPath = value; OnPropertyChanged(nameof(DataPath)); }
+        }
+
+        public ObservableCollection<TaxQuarter> TaxQuarters => _taxPeriodsManager.TaxQuarters;
+
+        public ObservableCollection<TaxLine> TaxLines { get; private set; } = new ObservableCollection<TaxLine>();
+
+        public TaxQuarter SelectedQuarter
+        {
+            get => _selectedQuarter;
+            set
+            {
+                if (Equals(_selectedQuarter, value))
+                    return;
+
+                _selectedQuarter = value;
+                OnPropertyChanged(nameof(SelectedQuarter));
+                LoadSelectedQuarterData();
+            }
+        }
+
+        public string FileId
+        {
+            get => _fileId;
+            set { _fileId = value; OnPropertyChanged(nameof(FileId)); OnPropertyChanged(nameof(FileNameLength)); }
+        }
+
+        public int FileNameLength => string.IsNullOrEmpty(FileId) ? 0 : FileId.Length;
+
+        public string XmlPreview
+        {
+            get => _xmlPreview;
+            set { _xmlPreview = value; OnPropertyChanged(nameof(XmlPreview)); }
+        }
+
+        public string FromFNS
+        {
+            get => _fromFNS;
+            set { _fromFNS = value; OnPropertyChanged(nameof(FromFNS)); }
+        }
+
+        public string ToFNS
+        {
+            get => _toFNS;
+            set { _toFNS = value; OnPropertyChanged(nameof(ToFNS)); }
+        }
+
+        public string KND { get; set; } = KNDDefault;
+        public string DateDoc
+        {
+            get => _dateDoc;
+            set { _dateDoc = value; OnPropertyChanged(nameof(DateDoc)); }
+        }
+
+        public string KodNO
+        {
+            get => _kodNO;
+            set { _kodNO = value; OnPropertyChanged(nameof(KodNO)); }
+        }
+
         public string InnFL
         {
-            get { return _innFL; }
+            get => _innFL;
             set { _innFL = value; OnPropertyChanged(nameof(InnFL)); }
         }
 
-        private int _selectedQuarter = -1;
-        public int SelectedQuarter
+        public string Fam { get; set; } = SenderFam;
+        public string Name { get; set; } = SenderName;
+        public string Patronymic { get; set; } = SenderPatronymic;
+        public string DocName { get; set; } = DocNameDefault;
+        public string VersProg { get; set; } = VersProgDefault;
+        public string VersForm { get; set; } = VersFormDefault;
+        public string Oktmo { get; set; } = "75506000";
+        public string PrPodp { get; set; } = PrPodpDefault;
+
+        public string PrefixRT
         {
-            get { return _selectedQuarter; }
-            set { _selectedQuarter = value; OnPropertyChanged(nameof(SelectedQuarter)); }
-        }
-        private int _selectedMonth = -1;
-        public int SelectedMonth
-        {
-            get { return _selectedMonth; }
-            set { _selectedMonth = value; OnPropertyChanged(nameof(SelectedMonth)); }
+            get => _prefixRT;
+            set { _prefixRT = value; OnPropertyChanged(nameof(PrefixRT)); }
         }
 
+        public string A
+        {
+            get => _a;
+            set { _a = value; OnPropertyChanged(nameof(A)); }
+        }
+
+        public string K
+        {
+            get => _k;
+            set { _k = value; OnPropertyChanged(nameof(K)); }
+        }
+
+        public string O
+        {
+            get => _o;
+            set { _o = value; OnPropertyChanged(nameof(O)); }
+        }
 
         public MainViewModel()
         {
@@ -98,7 +153,11 @@ namespace GeneratorXML
             LoadPeriodDataCommand = new RelayCommand(_ => LoadPeriodData());
             GenerateFileNameCommand = new RelayCommand(_ => GenerateFileName());
             GenerateXmlCommand = new RelayCommand(_ => GenerateXml());
+
+            if (TaxQuarters.Any())
+                SelectedQuarter = TaxQuarters.First();
         }
+
         public ICommand SelectExcelCommand { get; }
         public ICommand LoadPeriodDataCommand { get; }
         public ICommand GenerateFileNameCommand { get; }
@@ -128,10 +187,12 @@ namespace GeneratorXML
                     return;
 
                 using (var package = new ExcelPackage(new FileInfo(filePath)))
-                    _TaxPeriodsManager.UpdateData(package);
+                {
+                    _taxPeriodsManager.UpdateData(package);
+                }
 
-                //SelectedMonth = -1;
-                //SelectedQuarter = -1;
+                OnPropertyChanged(nameof(TaxQuarters));
+                SelectedQuarter = TaxQuarters.FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -150,8 +211,16 @@ namespace GeneratorXML
                     return;
                 }
 
-                TaxLines = new ObservableCollection<TaxLine>(rows);
-                MessageBox.Show($"Данные загружены за период: {SelectedPeriod}", "Готово", MessageBoxButton.OK, MessageBoxImage.Information);
+                using (var package = new ExcelPackage(new FileInfo(DataPath)))
+                {
+                    _taxPeriodsManager.UpdateData(package);
+                }
+
+                OnPropertyChanged(nameof(TaxQuarters));
+                SelectedQuarter = TaxQuarters.FirstOrDefault();
+
+                MessageBox.Show($"Данные загружены. Найдено кварталов: {TaxQuarters.Count}", "Готово",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -159,122 +228,17 @@ namespace GeneratorXML
             }
         }
 
-        private List<TaxLine> ReadMonthRows(int selectedMonth)
+        private void LoadSelectedQuarterData()
         {
-            List<TaxLine> result = new List<TaxLine>();
+            TaxLines.Clear();
 
-            using (var package = new ExcelPackage(new FileInfo(ExcelPath)))
+            if (SelectedQuarter == null)
+                return;
+
+            foreach (var taxLine in SelectedQuarter.Mounts.SelectMany(m => m.TaxLines))
             {
-                var worksheet = package.Workbook.Worksheets[SheetNameUved]
-                    ?? throw new Exception($"Лист '{SheetNameUved}' не найден.");
-
-                for (int row = 3; row < 30; row++)
-                {
-                    var periodText = worksheet.Cells[row, 2].Text?.Trim();
-
-                    if (string.IsNullOrWhiteSpace(periodText))
-                        continue;
-
-                    int normalizedMonth = NormalizeMonthKey(periodText);
-
-                    if (normalizedMonth != selectedMonth)
-                        continue;
-
-                    float? valueC = worksheet.Cells[row, 3].GetValue<float?>();
-                    float? valueD = worksheet.Cells[row, 4].GetValue<float?>();
-                    float? valueE = worksheet.Cells[row, 5].GetValue<float?>();
-
-                    if (valueC.HasValue) totalC += valueC.Value;
-                    if (valueD.HasValue) totalD += valueD.Value;
-                    if (valueE.HasValue) totalE += valueE.Value;
-
-                    if (string.IsNullOrEmpty(monthCode))
-                    {
-                        monthCode = GetNomerMesKvart(periodText);
-                        periodCode = GetPeriodCode(periodText);
-                    }
-                }
-
-                if (totalC != 0)
-                    result.Add(new TaxLine
-                    {
-                        Oktmo = Oktmo,
-                        Kbk = "18210102010011000110",
-                        Sum = totalC.ToString("0.00", CultureInfo.InvariantCulture),
-                        Period = periodCode,
-                        NomerMesKvart = monthCode,
-                        Year = DateTime.Today.Year.ToString()
-                    });
-
-                if (totalD != 0)
-                    result.Add(new TaxLine
-                    {
-                        Oktmo = Oktmo,
-                        Kbk = "18210102210011000110",
-                        Sum = totalD.ToString("0.00", CultureInfo.InvariantCulture),
-                        Period = periodCode,
-                        NomerMesKvart = monthCode,
-                        Year = DateTime.Today.Year.ToString()
-                    });
-
-                if (totalE != 0)
-                    result.Add(new TaxLine
-                    {
-                        Oktmo = Oktmo,
-                        Kbk = "18210201000011000160",
-                        Sum = totalE.ToString("0.00", CultureInfo.InvariantCulture),
-                        Period = periodCode,
-                        NomerMesKvart = monthCode,
-                        Year = DateTime.Today.Year.ToString()
-                    });
+                TaxLines.Add(taxLine);
             }
-
-            return result;
-        }
-
-        private string GetPeriodCode(string periodText)
-        {
-            // Делает из "21/01" -> "31" по схеме, у которой вы описали квартальные значения.
-            // В реальном проекте можно сделать более точную формулу: 21=>31, 31=>31, 33=>31, 34=>31.
-            if (string.IsNullOrWhiteSpace(periodText))
-                return "31";
-
-            var text = periodText.Trim();
-            if (text.Contains("/"))
-            {
-                var parts = text.Split('/');
-                if (parts.Length >= 2)
-                {
-                    var first = parts[0].Trim();
-                    if (first == "21" || first == "31" || first == "33" || first == "34")
-                        return "31";
-                }
-            }
-
-            return "31";
-        }
-
-        private string GetNomerMesKvart(string periodText)
-        {
-            // Из строки вида "21/01" делает "01"
-            // Из "31/02" -> "02"
-            // По сути: месяц внутри квартала.
-            if (string.IsNullOrWhiteSpace(periodText))
-                return "01";
-
-            var text = periodText.Trim();
-            if (text.Contains("/"))
-            {
-                var parts = text.Split('/');
-                if (parts.Length >= 2)
-                {
-                    var month = parts[1].Trim();
-                    if (int.TryParse(month, out _))
-                        return month.PadLeft(2, '0');
-                }
-            }
-
-            return "01";
         }
 
         private void GenerateFileName()
@@ -297,9 +261,9 @@ namespace GeneratorXML
                 var guid = Guid.NewGuid().ToString("D").ToUpperInvariant();
 
                 FileId = $"{PrefixRT}_{A}_{K}_{O}_{datePart}_{guid}";
-                OnPropertyChanged(nameof(FileNameLength));
 
-                MessageBox.Show($"Имя файла сформировано:\n{FileId}\n\nДлина: {FileNameLength}", "Генерация имени", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Имя файла сформировано:\n{FileId}\n\nДлина: {FileNameLength}", "Генерация имени",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -318,7 +282,6 @@ namespace GeneratorXML
                     throw new Exception("Нельзя генерировать XML без строк.");
 
                 var xml = BuildXml(FileId, TaxLines);
-
                 XmlPreview = xml;
 
                 var saveDialog = new SaveFileDialog
@@ -369,7 +332,7 @@ namespace GeneratorXML
                             new XElement("УвИсчСумНалог",
                                 new XAttribute("ОКТМО", line.Oktmo),
                                 new XAttribute("КБК", line.Kbk),
-                                new XAttribute("СумНалогАванс", line.Sum),
+                                new XAttribute("СумНалогАванс", line.Sum.ToString("0.00", CultureInfo.InvariantCulture)),
                                 new XAttribute("Период", line.Period),
                                 new XAttribute("НомерМесКварт", line.NomerMesKvart),
                                 new XAttribute("Год", line.Year)

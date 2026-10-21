@@ -1,4 +1,4 @@
-﻿<Window x:Class="GeneratorXML.MainWindow"
+<Window x:Class="GeneratorXML.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,122 +7,121 @@
         mc:Ignorable="d"
         Title="Генератор XML" Height="840" Width="1180" WindowStartupLocation="CenterScreen">
 
-	<Window.DataContext>
-		<local:MainViewModel/>
-	</Window.DataContext>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="220"/>
+        </Grid.RowDefinitions>
 
-	<Grid Margin="10">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="220"/>
-		</Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Путь к файлу Excel:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Width="560" Text="{Binding DataPath, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="Выбрать..." Width="100" Margin="10,0,0,0" Command="{Binding SelectExcelCommand}"/>
+            </StackPanel>
 
-		<StackPanel Grid.Row="0" Margin="0,0,0,10">
-			<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-				<TextBlock Text="Путь к файлу Excel:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-				<TextBox Width="560" Text="{Binding DataPath, UpdateSourceTrigger=PropertyChanged}"/>
-				<Button Content="Выбрать..." Width="100" Margin="10,0,0,0" Command="{Binding SelectExcelCommand}"/>
-			</StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Период:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox Width="220"
+                          ItemsSource="{Binding TaxQuarters}"
+                          SelectedItem="{Binding SelectedQuarter, Mode=TwoWay}"
+                          DisplayMemberPath="Quarter"/>
+                <Button Content="Загрузить данные" Width="150" Margin="10,0,0,0" Command="{Binding LoadPeriodDataCommand}"/>
+            </StackPanel>
 
-			<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-				<TextBlock Text="Период:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-				<ComboBox Width="220" ItemsSource="{Binding TaxQuarters}" SelectedItem="{Binding SelectedQuarter}"/>
-				<Button Content="Загрузить данные" Width="150" Margin="10,0,0,0" Command="{Binding LoadPeriodDataCommand}"/>
-			</StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="R_T:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Width="220" Text="{Binding PrefixRT}"/>
 
-			<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-				<TextBlock Text="R_T:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-				<TextBox Width="220" Text="{Binding PrefixRT}"/>
+                <TextBlock Text="A:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox Width="80" Text="{Binding A}"/>
 
-				<TextBlock Text="A:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBox Width="80" Text="{Binding A}"/>
+                <TextBlock Text="K:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox Width="80" Text="{Binding K}"/>
 
-				<TextBlock Text="K:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBox Width="80" Text="{Binding K}"/>
+                <TextBlock Text="O:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox Width="180" Text="{Binding O}"/>
 
-				<TextBlock Text="O:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBox Width="180" Text="{Binding O}"/>
+                <Button Content="Сформировать имя" Width="150" Margin="10,0,0,0" Command="{Binding GenerateFileNameCommand}"/>
+            </StackPanel>
 
-				<Button Content="Сформировать имя" Width="150" Margin="10,0,0,0" Command="{Binding GenerateFileNameCommand}"/>
-			</StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="ИдФайл:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Width="620" Text="{Binding FileId, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="Длина:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBlock Text="{Binding FileNameLength}" FontWeight="Bold"/>
+                <Button Content="Сохранить XML" Width="140" Margin="20,0,0,0" Command="{Binding GenerateXmlCommand}"/>
+            </StackPanel>
+        </StackPanel>
 
-			<StackPanel Orientation="Horizontal">
-				<TextBlock Text="ИдФайл:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-				<TextBox Width="620" Text="{Binding FileId, UpdateSourceTrigger=PropertyChanged}"/>
-				<TextBlock Text="Длина:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-				<TextBlock Text="{Binding FileNameLength}" FontWeight="Bold"/>
-				<Button Content="Сохранить XML" Width="140" Margin="20,0,0,0" Command="{Binding GenerateXmlCommand}"/>
-			</StackPanel>
-		</StackPanel>
+        <TabControl Grid.Row="1">
+            <TabItem Header="Основные данные">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-		<TabControl Grid.Row="1">
-			<TabItem Header="Основные данные">
-				<Grid Margin="10">
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="*"/>
-						<ColumnDefinition Width="*"/>
-					</Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                        <TextBlock Text="КНД"/>
+                        <TextBox Text="{Binding KND}"/>
 
-					<StackPanel Grid.Column="0" Margin="0,0,20,0">
-						<TextBlock Text="КНД"/>
-						<TextBox Text="{Binding KND}"/>
+                        <TextBlock Text="ДатаДок" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding DateDoc}"/>
 
-						<TextBlock Text="ДатаДок" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding DateDoc}"/>
+                        <TextBlock Text="КодНО" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding KodNO}"/>
 
-						<TextBlock Text="КодНО" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding KodNO}"/>
+                        <TextBlock Text="ИННФЛ" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding InnFL}"/>
 
-						<TextBlock Text="ИННФЛ" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding InnFL}"/>
+                        <TextBlock Text="Фамилия" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding Fam}"/>
 
-						<TextBlock Text="Фамилия" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding Fam}"/>
+                        <TextBlock Text="Имя" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding Name}"/>
 
-						<TextBlock Text="Имя" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding Name}"/>
+                        <TextBlock Text="Отчество" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding Patronymic}"/>
+                    </StackPanel>
 
-						<TextBlock Text="Отчество" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding Patronymic}"/>
-					</StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="НаимДок"/>
+                        <TextBox Text="{Binding DocName}"/>
 
-					<StackPanel Grid.Column="1">
-						<TextBlock Text="НаимДок"/>
-						<TextBox Text="{Binding DocName}"/>
+                        <TextBlock Text="ВерсПрог" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding VersProg}"/>
 
-						<TextBlock Text="ВерсПрог" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding VersProg}"/>
+                        <TextBlock Text="ВерсФорм" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding VersForm}"/>
 
-						<TextBlock Text="ВерсФорм" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding VersForm}"/>
+                        <TextBlock Text="ОКТМО" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding Oktmo}"/>
 
-						<TextBlock Text="ОКТМО" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding Oktmo}"/>
+                        <TextBlock Text="ПрПодп" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding PrPodp}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
 
-						<TextBlock Text="ПрПодп" Margin="0,10,0,0"/>
-						<TextBox Text="{Binding PrPodp}"/>
-					</StackPanel>
-				</Grid>
-			</TabItem>
+            <TabItem Header="Строки">
+                <DataGrid ItemsSource="{Binding TaxLines}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="10">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ОКТМО" Binding="{Binding Oktmo}" Width="120"/>
+                        <DataGridTextColumn Header="КБК" Binding="{Binding Kbk}" Width="200"/>
+                        <DataGridTextColumn Header="Сумма" Binding="{Binding Sum}" Width="100"/>
+                        <DataGridTextColumn Header="Период" Binding="{Binding Period}" Width="80"/>
+                        <DataGridTextColumn Header="НомерМесКварт" Binding="{Binding NomerMesKvart}" Width="120"/>
+                        <DataGridTextColumn Header="Год" Binding="{Binding Year}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
 
-			<TabItem Header="Строки">
-				<DataGrid ItemsSource="{Binding TaxLines}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="10">
-					<DataGrid.Columns>
-						<DataGridTextColumn Header="ОКТМО" Binding="{Binding Oktmo}" Width="120"/>
-						<DataGridTextColumn Header="КБК" Binding="{Binding Kbk}" Width="200"/>
-						<DataGridTextColumn Header="Сумма" Binding="{Binding Sum}" Width="100"/>
-						<DataGridTextColumn Header="Период" Binding="{Binding Period}" Width="80"/>
-						<DataGridTextColumn Header="НомерМесКварт" Binding="{Binding NomerMesKvart}" Width="120"/>
-						<DataGridTextColumn Header="Год" Binding="{Binding Year}" Width="80"/>
-					</DataGrid.Columns>
-				</DataGrid>
-			</TabItem>
-		</TabControl>
-
-		<TextBox Grid.Row="2" Text="{Binding XmlPreview}" IsReadOnly="True"
+        <TextBox Grid.Row="2" Text="{Binding XmlPreview}" IsReadOnly="True"
                  FontFamily="Consolas" FontSize="12" TextWrapping="NoWrap"
                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                  Margin="0,10,0,0"/>
-	</Grid>
+    </Grid>
 </Window>

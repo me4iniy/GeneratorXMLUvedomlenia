@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace GeneratorXML
 {
     public class TaxLine
     {
+        public enum Type { Insuranse, NDFL, sNDFL }
+
         public TaxLine(Type type, int oktmo, float sum, string period, string nomerMesKvart, int year)
         {
             switch (type)
@@ -21,8 +19,11 @@ namespace GeneratorXML
                 case Type.sNDFL:
                     Kbk = "18210102210011000110";
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
+            LineType = type;
             Oktmo = oktmo;
             Sum = sum;
             Period = period;
@@ -30,13 +31,12 @@ namespace GeneratorXML
             Year = year;
         }
 
-        public enum Type { Insuranse, NDFL, sNDFL }
-
-        public readonly int Oktmo;
-        public readonly string Kbk;
-        public readonly float Sum;
-        public readonly string Period;
-        public readonly string NomerMesKvart;
-        public readonly int Year;
+        public Type LineType { get; }
+        public int Oktmo { get; }
+        public string Kbk { get; }
+        public float Sum { get; }
+        public string Period { get; }
+        public string NomerMesKvart { get; }
+        public int Year { get; }
     }
 }

@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GeneratorXML
 {
     public class TaxQuarter : INotifyPropertyChanged
     {
-        public readonly ObservableCollection<TaxMount> _mounts = new ObservableCollection<TaxMount>();
+        private readonly ObservableCollection<TaxMount> _mounts = new ObservableCollection<TaxMount>();
+
         public TaxQuarter(string quarter)
         {
-            _Quarter = quarter;
+            Quarter = quarter;
         }
 
-        public readonly string _Quarter;
+        public string Quarter { get; }
+        public ObservableCollection<TaxMount> Mounts => _mounts;
 
         public event PropertyChangedEventHandler PropertyChanged
         {
@@ -33,7 +31,7 @@ namespace GeneratorXML
 
         public override string ToString()
         {
-            return TaxQuarter.ConvertToInt(_Quarter).ToString();
+            return ConvertToInt(Quarter).ToString();
         }
 
         public static int ConvertToInt(string value)
